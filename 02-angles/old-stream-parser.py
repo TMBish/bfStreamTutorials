@@ -12,8 +12,6 @@ import logging
 from unittest.mock import patch
 from typing import List, Set, Dict, Tuple, Optional
 from itertools import zip_longest
-import plotly.express as px
-
 import betfairlightweight
 from betfairlightweight import StreamListener
 from betfairlightweight.resources.bettingresources import (
@@ -21,8 +19,8 @@ from betfairlightweight.resources.bettingresources import (
     MarketBook
 )
 
-## FUNCTIONS
-##______________________________________________
+# FUNCTIONS
+#______________________________________________
 
 # rounding to 2 decimal places or returning '' if blank
 def as_str(v) -> str:
