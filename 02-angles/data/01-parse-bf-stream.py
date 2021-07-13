@@ -159,7 +159,7 @@ def parse_stream(stream_files, output_file):
 # Parameters
 # _________________________________
 
-with open("../secrets.yaml", 'r') as stream:
+with open("../../secrets.yaml", 'r') as stream:
     creds = yaml.safe_load(stream)
 
 trading = betfairlightweight.APIClient(creds['uid'], creds['pwd'],  app_key=creds["api_key"])
@@ -176,4 +176,4 @@ output_file = "/media/hdd/tmp/thoroughbred-parsed/thoroughbred-odds-2021.csv"
 # _________________________________
 
 if __name__ == '__main__':
-    parse_stream(stream_files)
+    parse_stream(stream_files, output_file)
