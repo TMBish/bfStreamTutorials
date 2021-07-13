@@ -1,3 +1,4 @@
 data/*
 .Rproj.user
 secrets.yaml
+*.csv
