@@ -166,8 +166,12 @@ def parse_stream(stream_files, output_file):
             (t5m, t30s, preplay, postplay, inplayMin, final) = extract_components_from_stream(stream)
 
             # If no price data for market don't write to file
-            if postplay is None:
+            if postplay is None or final is None or t30s is None:
                 continue; 
+
+            # All runner removed
+            if all(runner.status == "REMOVED" for runner in final.runners):
+                continue
 
             runnerMeta = [
                 {
@@ -185,13 +189,13 @@ def parse_stream(stream_files, output_file):
 
             wapBack30s = [ wapPrice(runner.ex.available_to_back, 3) for runner in t30s.runners]
 
-            wapBack5m = [ wapPrice(runner.ex.available_to_lay, 3) for runner in t5m.runners]
+            wapBack5m = [ wapPrice(runner.ex.available_to_back, 3) for runner in t5m.runners]
 
             # Writing To CSV
             # ______________________
 
             for (runnerMeta, ltp, tradedVol, inplayMin, wapBack5m, wapBack30s) in zip(runnerMeta, ltp, tradedVol, inplayMin, wapBack5m, wapBack30s):
-
+                
                 if runnerMeta['selection_status'] != 'REMOVED':
 
                     output.write(
@@ -211,7 +215,7 @@ def parse_stream(stream_files, output_file):
 # Parameters
 # _________________________________
 
-with open("../../../secrets.yaml", 'r') as stream:
+with open("secrets.yaml", 'r') as stream:
     creds = yaml.safe_load(stream)
 
 trading = betfairlightweight.APIClient(creds['uid'], creds['pwd'],  app_key=creds["api_key"])
@@ -219,6 +223,7 @@ trading = betfairlightweight.APIClient(creds['uid'], creds['pwd'],  app_key=cred
 listener = StreamListener(max_latency=None)
 
 stream_files = glob.glob("/media/hdd/data/betfair-stream/thoroughbred/*.tar")
+#stream_files = ["/media/hdd/data/betfair-stream/thoroughbred/2021_02_FebRacingAUPro.tar"]
 output_file = "/media/hdd/tmp/thoroughbred-parsed/thoroughbred-odds-2021.csv"
 
 # Run
