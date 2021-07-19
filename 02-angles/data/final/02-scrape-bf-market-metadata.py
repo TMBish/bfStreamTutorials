@@ -87,7 +87,13 @@ def scrapeBfDate(dte):
 
     markets = getBfMarkets(dte)
 
+    if markets.shape[0] == 0:
+        return(pd.DataFrame())
+
     thoMarkets = markets.query('country == "AUS" and race_type == "R"')
+
+    if thoMarkets.shape[0] == 0:
+        return(pd.DataFrame())
 
     raceMetaList = []
 
@@ -97,7 +103,6 @@ def scrapeBfDate(dte):
     raceMeta = pd.concat(raceMetaList)
 
     return(markets.merge(raceMeta, on = 'market_id'))
-
 
 dataList = []
 dateList = pd.date_range(datetime.date(2020,7,1),datetime.date.today()-datetime.timedelta(days=1),freq='d')
@@ -109,4 +114,4 @@ for dte in dateList:
 
 data = pd.concat(dataList)
 
-data.to_csv("/media/hdd/tmp/thoroughbred-parsed/thoroughbred-race-data.csv")
+data.to_csv("/media/hdd/tmp/thoroughbred-parsed/thoroughbred-race-data.csv", index=False)
