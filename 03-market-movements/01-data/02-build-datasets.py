@@ -107,7 +107,7 @@ listener = StreamListener(max_latency=None)
 # Parameters
 # _________________________________
 
-with open("secrets.yaml", 'r') as stream:
+with open("../../secrets.yaml", 'r') as stream:
     creds = yaml.safe_load(stream)
 
 trading = betfairlightweight.APIClient(creds['uid'], creds['pwd'],  app_key=creds["api_key"])
@@ -177,7 +177,7 @@ def parse_final_selection_meta(dir, out_file):
 
                 if runnerMeta['selection_status'] != 'REMOVED':
 
-                    print(
+                    output.write(
                         "{},{},{},{},{},{},{}\n".format(
                             str(last_market_book.market_id),
                             runnerMeta['selection_id'],
