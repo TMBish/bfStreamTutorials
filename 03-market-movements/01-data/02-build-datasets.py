@@ -9,6 +9,7 @@ import bz2
 import glob
 import logging
 import yaml
+import csv
 
 from datetime import date, timedelta
 from unittest.mock import patch
@@ -280,24 +281,34 @@ def loop_preplay_prices(s, o):
                         limitWAP = sum([rung.size * rung.price for rung in runner.ex.traded_volume]) / limitTradedVol
                         limitWAP = round(limitWAP, 2)
 
-                    o.write(
-                        "{}, {}, {}, {}, {}, {}, {}, {}\n".format(
+                    o.writerow(
+                        (
                             market_book.market_id,
                             runner.selection_id,
                             market_book.publish_time,
                             limitTradedVol,
                             limitWAP,
                             runner.last_price_traded or "",
-                            '"' + str(atb_ladder).replace(' ','') + '"', 
-                            '"' + str(atl_ladder).replace(' ','') + '"'
+                            str(atb_ladder).replace(' ',''), 
+                            str(atl_ladder).replace(' ','')
                         )
-                    )   
+                    )
+
+
+
 
 def parse_preplay_prices(dir, out_file):
     
     with open(out_file, "w+") as output:
 
-        output.write("market_id,selection_id,time,traded_volume,wap,ltp,atb_ladder,atl_ladder\n")
+        writer = csv.writer(
+            output, 
+            delimiter=',',
+            lineterminator='\r\n',
+            quoting=csv.QUOTE_ALL
+        )
+        
+        writer.writerow(("market_id","selection_id","time","traded_volume","wap","ltp","atb_ladder","atl_ladder"))
 
         for file_obj in load_markets(dir):
 
@@ -306,7 +317,7 @@ def parse_preplay_prices(dir, out_file):
                 listener=listener,
             )
 
-            loop_preplay_prices(stream, output)
+            loop_preplay_prices(stream, writer)
 
 
 if __name__ == '__main__':
