@@ -189,9 +189,9 @@ def parse_final_selection_meta(dir, out_file):
                         )
                     )
 
-if __name__ == '__main__':
-    print("__ Parsing Selection Metadata ___ ")
-    parse_final_selection_meta(stream_files, selection_meta)
+# if __name__ == '__main__':
+#     print("__ Parsing Selection Metadata ___ ")
+#     parse_final_selection_meta(stream_files, selection_meta)
 
 
 # PREPLAY PRICES
