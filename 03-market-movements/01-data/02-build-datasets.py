@@ -241,7 +241,7 @@ def loop_preplay_prices(s, o):
                     
                     seconds_to_start = (market_book.market_definition.market_time - market_book.publish_time).total_seconds()
 
-                    if seconds_to_start <= log1_Start:
+                    if seconds_to_start > log1_Start:
                         
                         # Too early before off to start logging prices
                         continue
