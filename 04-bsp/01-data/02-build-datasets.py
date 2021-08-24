@@ -59,20 +59,6 @@ def load_markets(file_paths):
 
     return None
 
-def slicePrice(l, n):
-    try:
-        x = l[n].price
-    except:
-        x = ""
-    return(x)
-
-def sliceSize(l, n):
-    try:
-        x = l[n].size
-    except:
-        x = ""
-    return(x)
-
 def pull_ladder(availableLadder, n = 5):
         out = {}
         price = []
@@ -106,7 +92,6 @@ with open("../secrets.yaml", 'r') as stream:
 trading = betfairlightweight.APIClient(creds['uid'], creds['pwd'],  app_key=creds["api_key"])
 
 listener = StreamListener(max_latency=None)
-
 
 # Market Metadata
 # ________________________________
@@ -169,7 +154,7 @@ def parse_final_selection_meta(dir, out_file):
 # Preplay Prices
 # ________________________________
 
-def loop_preplay_prices(s):
+def loop_preplay_prices(s, o):
 
     with patch("builtins.open", lambda f, _: f):
 
@@ -178,6 +163,8 @@ def loop_preplay_prices(s):
         marketID = None
         tradeVols = None
         time = None
+        last_book_recorded = False
+        prev_book = None
 
         for market_books in gen():
 
@@ -185,44 +172,48 @@ def loop_preplay_prices(s):
 
             if ((evaluate_market := filter_market(market_books[0])) == False):
                     break
-
+            
             for market_book in market_books:
 
                 # Time Step Management ++++++++++++++++++++++++++++++++++
+
                 if marketID is None:
                     # No market initialised
                     marketID = market_book.market_id
                     time =  market_book.publish_time
-                elif market_book.inplay:
-                    # Stop once market goes inplay
+                elif market_book.inplay and last_book_recorded:
                     break
                 else:
-                    
+                                            
                     seconds_to_start = (market_book.market_definition.market_time - market_book.publish_time).total_seconds()
 
                     if seconds_to_start > 30:
                         # Too early before off to start logging prices
+                        prev_book = market_book
                         continue
                     else:
-                    
+                        
                         # Update data at different time steps depending on seconds to off
                         wait = 5
 
                         # New Market
                         if market_book.market_id != marketID:
+                            last_book_recorded = False
                             marketID = market_book.market_id
                             time =  market_book.publish_time
                         # (wait) seconds elapsed since last write
                         elif (market_book.publish_time - time).total_seconds() > wait:
                             time = market_book.publish_time
+                        # if current marketbook is inplay want to record the previous market book as it's the last preplay marketbook
+                        elif market_book.inplay:
+                            last_book_recorded = True
+                            market_book = prev_book
                         # fewer than (wait) seconds elapsed continue to next loop
                         else:
+                            prev_book = market_book
                             continue
 
                 # Execute Data Logging ++++++++++++++++++++++++++++++++++
-
-                test = "here"
-
                 for runner in market_book.runners:
 
                     try:
@@ -238,40 +229,60 @@ def loop_preplay_prices(s):
                             runner.selection_id,
                             market_book.publish_time,
                             # SP Fields
-                            runner.sp.nearPrice,
-                            runner.sp.farPrice,
-                            runner.sp.back_stake_taken,
-                            runner.sp.lay_liability_taken,
+                            runner.sp.near_price,
+                            runner.sp.far_price,
+                            int(sum([ps.size for ps in runner.sp.back_stake_taken])),
+                            int(sum([ps.size for ps in runner.sp.lay_liability_taken])),
                             # Limit bets available
                             str(atb_ladder).replace(' ',''), 
                             str(atl_ladder).replace(' ','')
                         )
                     )
 
-def parse_preplay_prices(dir):
+                prev_book = market_book
+
+def parse_preplay_prices(dir, out_file):
     
-    # with open(out_file, "w+") as output:
-    #     writer = csv.writer(
-    #         output, 
-    #         delimiter=',',
-    #         lineterminator='\r\n',
-    #         quoting=csv.QUOTE_ALL
-    #     )
-    #     writer.writerow(("market_id","selection_id","time","traded_volume","wap","ltp","atb_ladder","atl_ladder"))
+    with open(out_file, "w+") as output:
 
-    for file_obj in load_markets(dir):
-
-        stream = trading.streaming.create_historical_generator_stream(
-            file_path=file_obj,
-            listener=listener,
+        writer = csv.writer(
+            output, 
+            delimiter=',',
+            lineterminator='\r\n',
+            quoting=csv.QUOTE_ALL
         )
+        writer.writerow(("market_id","selection_id","time","near_price","far_price","bsp_back_pool_stake","bsp_lay_pool_liability","atb_ladder",'atl_ladder'))
 
-        loop_preplay_prices(stream)
+        for file_obj in load_markets(dir):
+
+            stream = trading.streaming.create_historical_generator_stream(
+                file_path=file_obj,
+                listener=listener,
+            )
+
+            loop_preplay_prices(stream, writer)
 
 
-# Executing Stepthrough
+# Executing
 # ________________________________
 
-stream_file = ["/media/hdd/data/betfair-stream/thoroughbred/2021_06_JunRacingAUPro.tar"]
+# Output files +++++++++++++++++++++++++
+metaFile = "/media/hdd/tmp/bsp/meta.csv"
+priceFile = "/media/hdd/tmp/bsp/prices.csv"
 
-parse_preplay_prices(stream_file)
+# Input files  +++++++++++++++++++++++++
+stream_files = [
+    "/media/hdd/data/betfair-stream/thoroughbred/2021_06_JunRacingAUPro.tar",
+    "/media/hdd/data/betfair-stream/thoroughbred/2021_05_MayRacingAUPro.tar",
+    "/media/hdd/data/betfair-stream/thoroughbred/2021_04_AprRacingAUPro.tar"
+]
+
+# Execute Meta Parse  +++++++++++++++++++++++++
+if __name__ == '__main__':
+    print("__ Parsing Selection Meta ___ ")
+    # parse_final_selection_meta(stream_files, metaFile)
+
+# Execute Price Parse  +++++++++++++++++++++++++
+if __name__ == '__main__':
+    print("__ Parsing Selection Prices ___ ")
+    parse_preplay_prices(stream_files, priceFile)
