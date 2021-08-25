@@ -143,7 +143,7 @@ def parse_final_selection_meta(dir, out_file):
             for runnerMeta in runnerMeta:
                 if runnerMeta['selection_status'] != 'REMOVED':
                     output.write(
-                        "{},{},{},{},{},{},{},{}\n".format(
+                        "{},{},{},{},{},{},{}\n".format(
                             str(last_market_book.market_id),
                             runnerMeta['selection_id'],
                             last_market_book.market_definition.venue,
