@@ -73,6 +73,9 @@ def pull_ladder(availableLadder, n = 5):
             out["p"] = price
             out["v"] = volume
             return(out)
+    
+def ladder_traded_volume(ladder):
+    return(sum([rung.size for rung in ladder]))
 
 def filter_market(market: MarketBook) -> bool: 
     
@@ -140,7 +143,7 @@ def parse_final_selection_meta(dir, out_file):
             for runnerMeta in runnerMeta:
                 if runnerMeta['selection_status'] != 'REMOVED':
                     output.write(
-                        "{},{},{},{},{},{},{}\n".format(
+                        "{},{},{},{},{},{},{},{}\n".format(
                             str(last_market_book.market_id),
                             runnerMeta['selection_id'],
                             last_market_book.market_definition.venue,
@@ -224,11 +227,14 @@ def loop_preplay_prices(s, o):
                         atb_ladder = {}
                         atl_ladder = {}
 
+                    limitTradedVol = sum([rung.size for rung in runner.ex.traded_volume])
+
                     o.writerow(
                         (
                             market_book.market_id,
                             runner.selection_id,
                             market_book.publish_time,
+                            int(limitTradedVol),
                             # SP Fields
                             runner.sp.near_price,
                             runner.sp.far_price,
@@ -252,7 +258,7 @@ def parse_preplay_prices(dir, out_file):
             lineterminator='\r\n',
             quoting=csv.QUOTE_ALL
         )
-        writer.writerow(("market_id","selection_id","time","near_price","far_price","bsp_back_pool_stake","bsp_lay_pool_liability","atb_ladder",'atl_ladder'))
+        writer.writerow(("market_id","selection_id","time","traded_volume","near_price","far_price","bsp_back_pool_stake","bsp_lay_pool_liability","atb_ladder",'atl_ladder'))
 
         for file_obj in load_markets(dir):
 
@@ -281,7 +287,7 @@ stream_files = [
 # Execute Meta Parse  +++++++++++++++++++++++++
 if __name__ == '__main__':
     print("__ Parsing Selection Meta ___ ")
-    # parse_final_selection_meta(stream_files, metaFile)
+    parse_final_selection_meta(stream_files, metaFile)
 
 # Execute Price Parse  +++++++++++++++++++++++++
 if __name__ == '__main__':
