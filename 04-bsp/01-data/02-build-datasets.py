@@ -86,7 +86,7 @@ def filter_market(market: MarketBook) -> bool:
 # Credentials
 # ________________________________
 
-with open("../secrets.yaml", 'r') as stream:
+with open("../../secrets.yaml", 'r') as stream:
     creds = yaml.safe_load(stream)
 
 trading = betfairlightweight.APIClient(creds['uid'], creds['pwd'],  app_key=creds["api_key"])
@@ -187,20 +187,21 @@ def loop_preplay_prices(s, o):
                                             
                     seconds_to_start = (market_book.market_definition.market_time - market_book.publish_time).total_seconds()
 
-                    if seconds_to_start > 30:
+                    if seconds_to_start > 120:
                         # Too early before off to start logging prices
                         prev_book = market_book
                         continue
                     else:
                         
                         # Update data at different time steps depending on seconds to off
-                        wait = 5
+                        wait = 10
 
                         # New Market
                         if market_book.market_id != marketID:
                             last_book_recorded = False
                             marketID = market_book.market_id
                             time =  market_book.publish_time
+                            continue
                         # (wait) seconds elapsed since last write
                         elif (market_book.publish_time - time).total_seconds() > wait:
                             time = market_book.publish_time
