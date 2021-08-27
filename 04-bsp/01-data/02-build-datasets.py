@@ -278,11 +278,13 @@ metaFile = "/media/hdd/tmp/bsp/meta.csv"
 priceFile = "/media/hdd/tmp/bsp/prices.csv"
 
 # Input files  +++++++++++++++++++++++++
-stream_files = [
-    "/media/hdd/data/betfair-stream/thoroughbred/2021_06_JunRacingAUPro.tar",
-    "/media/hdd/data/betfair-stream/thoroughbred/2021_05_MayRacingAUPro.tar",
-    "/media/hdd/data/betfair-stream/thoroughbred/2021_04_AprRacingAUPro.tar"
-]
+# stream_files = [
+#     "/media/hdd/data/betfair-stream/thoroughbred/2021_06_JunRacingAUPro.tar",
+#     "/media/hdd/data/betfair-stream/thoroughbred/2021_05_MayRacingAUPro.tar",
+#     "/media/hdd/data/betfair-stream/thoroughbred/2021_04_AprRacingAUPro.tar"
+# ]
+
+stream_files = glob.glob("/media/hdd/data/betfair-stream/thoroughbred/*.tar")
 
 # Execute Meta Parse  +++++++++++++++++++++++++
 if __name__ == '__main__':
