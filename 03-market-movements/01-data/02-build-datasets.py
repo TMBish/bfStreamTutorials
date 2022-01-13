@@ -98,20 +98,10 @@ def filter_market(market: MarketBook) -> bool:
         and d.market_type == 'WIN' 
         and (c := split_anz_horse_market_name(d.name)[2]) != 'trot' and c != 'pace')
 
-with open("../../secrets.yaml", 'r') as stream:
-    creds = yaml.safe_load(stream)
-
-trading = betfairlightweight.APIClient(creds['uid'], creds['pwd'],  app_key=creds["api_key"])
-
-listener = StreamListener(max_latency=None)
-
 # Parameters
 # _________________________________
 
-with open("../../secrets.yaml", 'r') as stream:
-    creds = yaml.safe_load(stream)
-
-trading = betfairlightweight.APIClient(creds['uid'], creds['pwd'],  app_key=creds["api_key"])
+trading = betfairlightweight.APIClient(username = "username", password = "password", app_key="app_key")
 
 listener = StreamListener(max_latency=None)
 
@@ -190,9 +180,9 @@ def parse_final_selection_meta(dir, out_file):
                         )
                     )
 
-# if __name__ == '__main__':
-#     print("__ Parsing Selection Metadata ___ ")
-#     parse_final_selection_meta(stream_files, selection_meta)
+if __name__ == '__main__':
+    print("__ Parsing Selection Metadata ___ ")
+#   parse_final_selection_meta(stream_files, selection_meta)
 
 
 # PREPLAY PRICES
