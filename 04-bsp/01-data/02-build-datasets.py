@@ -92,7 +92,7 @@ def filter_market(market: MarketBook) -> bool:
 with open("../../secrets.yaml", 'r') as stream:
     creds = yaml.safe_load(stream)
 
-trading = betfairlightweight.APIClient(creds['uid'], creds['pwd'],  app_key=creds["api_key"])
+trading = betfairlightweight.APIClient(username = "username", password = "password", app_key="app_key")
 
 listener = StreamListener(max_latency=None)
 

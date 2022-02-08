@@ -162,7 +162,7 @@ def parse_stream(stream_files, output_file):
 with open("../../secrets.yaml", 'r') as stream:
     creds = yaml.safe_load(stream)
 
-trading = betfairlightweight.APIClient(creds['uid'], creds['pwd'],  app_key=creds["api_key"])
+trading = betfairlightweight.APIClient(username = "username", password = "password", app_key="app_key")
 
 listener = StreamListener(max_latency=None)
 
